@@ -1,0 +1,7 @@
+                                         MAIN MENU 
+
+1. TRAVERSE BOOK RECORD 
+2. SEARCHING
+3. NEW RECORD
+4. EDIT RECORD
+5. EXIT

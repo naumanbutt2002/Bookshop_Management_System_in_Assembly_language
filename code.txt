@@ -1,0 +1,1149 @@
+include Irvine32.inc
+include macros.inc
+buffer_size  = 1000
+.data
+
+password   BYTE " ENTER THE PASSWORD TO RUN SYSTEM:    ",0
+correctpass   BYTE "                               !!!THE PASSWORD IS CORRECT!!!",0
+notcorrect   BYTE "                                !!!THE PASSWORD IS NOT CORRECT!!!",0
+continue BYTE " press any key to continue------------",0
+
+filename1 BYTE "presenter_names.txt",0
+filehandle1 HANDLE ?
+Gname BYTE sizeof buffer_size DUP(?)
+
+filename2 BYTE "p_heading_design.txt",0
+filehandle2 HANDLE ?
+design_arr BYTE sizeof buffer_size DUP(?)
+
+filename3 BYTE "menu_design.txt",0
+filehandle3 HANDLE ?
+menu_des_arr BYTE sizeof buffer_size DUP(?)
+
+
+
+modifyrec   BYTE " 1. MODIFY RECORD  ",0
+delrec   BYTE " 2. DELETE RECORD  ",0
+
+ER   BYTE "                            ENTER THE RECORD               ",0
+term   BYTE " 5. EXIT  ",0
+choose   BYTE " ENTER YOUR  CHOICE : ",0
+delins   BYTE " DO YOU WANT TO DELETE DATA (1/0): ",0
+pass1 dword ?
+pass2 dword 987654321
+choice dword ?
+
+BOOK_ID   dword  19,20,21,22,23
+PRICE     dword  300,450,250,239,347
+heading  byte "BOOK_ID        BOOK_NAME               AUTHOR_NAME                 PRICE",0
+space byte "              ",0
+name1 byte "OOP      ",0
+name2 byte "ENGLISH  ",0
+name3 byte "COAL     ",0
+name4 byte "CALCULUS ",0
+name5 byte "DLD      ",0
+name6 byte  "CHAUSER        ",0
+name7 byte  "JOHN DONNE     ",0
+name8 byte  "MUSARAT HUSSAIN",0
+name9 byte  "SHAHID KAMAL   ",0
+name10 byte "SARFARAZ AHMAD ",0
+namee   dword  name1,name2,name3,name4,name5
+aname   dword  name6,name7,name8,name9,name10
+
+book_Name BYTE 80 DUP(0)
+author_Name BYTE 80 DUP(0)
+namee2 dword 0
+aname2 dword 0
+BOOK_ID2 dword -1
+PRICE2 dword -1
+EBOOK byte "ENTER THE BOOK_ID:",0
+ENAME byte "BOOK NAME:",0
+EANAME byte "AUTHOR NAME:",0
+EPRICE byte "PRICE:",0
+REXIST byte "RECORD EXIST!!!!!",0
+notexist byte "RECORD IS NOT EXIST!!!!",0
+ADDED byte "                           ###RECORD IS ADDED SUCCESSFULLY###",0
+try dword 1
+check dword -1
+
+DELETED byte "                           ###RECORD IS DELETED SUCCESSFULLY###",0
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MAIN PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.code
+ main proc
+
+ call pass
+ call start 
+ call mainmenu
+ exit
+ main ENDP
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PASSWORD PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+ start_design proc
+	mov eax,white
+	call settextcolor
+	mov edx,offset filename2
+	call OpenInputFile
+	mov filehandle2,eax
+	mov edx,offset design_arr
+	mov ecx,buffer_size
+	call ReadFromFile
+	mov edx,offset design_arr
+	call writestring
+	mov eax,filehandle2
+	call CloseFile
+
+	  mov eax,500 
+	  call Delay
+	  mov eax,lightgray
+ call settextcolor
+
+	ret 
+	call exitprocess
+
+start_design ENDP
+
+
+
+ pass proc
+	
+  call start_design
+
+  mov eax,500 
+  call Delay
+
+ mov edx,OFFSET password 
+ call WriteString
+
+ call readint
+ cmp pass2,eax
+ jz correct
+ jnz notcorr
+
+correct:
+call crlf
+mov edx,OFFSET correctpass
+call WriteString
+call crlf
+call crlf
+call crlf
+mov edx,OFFSET continue
+call WriteString
+call readchar
+call Clrscr
+ret
+call exitprocess
+
+notcorr:
+call crlf
+mov edx,OFFSET notcorrect
+call WriteString
+call crlf
+call crlf
+call crlf
+mov edx,OFFSET password 
+call WriteString
+call readint
+cmp pass2,eax
+jz correct
+jnz notcorr
+call exitprocess
+
+pass ENDP
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;INTRODUCTION  PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+start proc
+
+  call start_design
+  mov eax,500 
+  call Delay
+ 
+
+mov edx,offset filename1
+call OpenInputFile
+mov filehandle1,eax
+mov edx,offset Gname
+mov ecx,buffer_size
+call ReadFromFile
+mov edx,offset Gname
+call writestring
+mov eax,filehandle1
+call CloseFile
+
+
+call crlf
+call crlf
+
+ 
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+ret
+start ENDP
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MAINMENU PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+mainmenu  proc
+call start_design 
+  mov eax,500 
+  call Delay
+
+    mov edx,offset filename3
+	call OpenInputFile
+	mov filehandle3,eax
+	mov edx,offset menu_des_arr
+	mov ecx,buffer_size
+	call ReadFromFile
+	mov edx,offset menu_des_arr
+	call writestring
+	mov eax,filehandle3
+	call CloseFile
+
+	call crlf
+	call crlf
+
+ mov edx,OFFSET choose 
+ call WriteString
+ call readint
+
+ mov choice,eax;
+ .if(choice==1)
+ call Clrscr
+ call bookrecord
+ ret
+
+ .elseif(choice==2)
+ call Clrscr
+ call searching
+ 
+ ret
+ .elseif(choice==3)
+ call Clrscr
+ call newrecord
+ ret
+ .elseif(choice==4)
+ call Clrscr
+ call editrecord
+ .else
+ ret
+ .ENDIF
+
+ call exitprocess
+
+ 
+
+ mainmenu ENDP
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BOOK_RECORD  PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ bookrecord proc
+
+	call start_design
+	mov eax,500
+	call delay
+
+
+  mov edx,OFFSET heading
+ call WriteString
+ call crlf
+ call crlf
+
+
+ mov esi,0
+ mov ecx,lengthof BOOK_ID
+ l1:
+ mov eax,BOOK_ID[esi]
+
+
+.if eax==0
+mov eax,NULL
+.endif
+ 
+ 
+ call writedec
+  mov edx,OFFSET space
+ call WriteString
+ mov edx, namee[esi]
+ call writestring
+ mov edx,OFFSET space
+ call WriteString
+  mov edx, aname[esi]
+.if eax==0
+mov eax,NULL
+.endif
+ call writestring
+  mov edx,OFFSET space
+ call WriteString
+  mov eax,PRICE[esi]
+ call writedec
+ call crlf
+
+
+ add esi,type BOOK_ID
+ loop l1
+
+
+
+
+ .if(try==2)
+ mov eax,BOOK_ID2
+ call writedec
+ mov edx,OFFSET space
+ call WriteString
+ mov edx,namee2
+ call writestring
+ mov edx,OFFSET space
+ call WriteString
+ mov edx,aname2
+ call writestring
+ mov edx,OFFSET space
+ call WriteString
+ mov eax,PRICE2
+ call writedec
+ call crlf
+ 
+
+ .ENDIF
+
+ call crlf
+  mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+
+ ret
+ bookrecord ENDP
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;NEW_RECORD PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ newrecord  proc
+
+ call start_design
+ mov eax,500
+ call delay
+
+ call crlf
+ mov edx,OFFSET ER 
+ call WriteString
+ call crlf 
+ call crlf
+ mov edx,OFFSET EBOOK
+ call WriteString
+ call readint
+ mov BOOK_ID2,eax
+
+ .if ((BOOK_ID2==19) || (BOOK_ID2==20) || (BOOK_ID2==21) || (BOOK_ID2==22) || (BOOK_ID2==23) )
+	 mov edx,OFFSET REXIST
+	 call WriteString
+	 call crlf
+	 mov edx,OFFSET EBOOK
+	 call WriteString
+	 call readint
+	 mov BOOK_ID2,eax
+
+ .ENDIF
+ 
+  mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,OFFSET book_Name
+ mov ecx,SIZEOF book_Name-1
+ call ReadString
+ mov namee2,edx
+
+  mov edx,OFFSET EANAME
+ call WriteString
+mov edx,OFFSET author_Name
+ mov ecx,SIZEOF author_Name-1
+ call ReadString
+ mov aname2,edx
+
+  mov edx,OFFSET EPRICE
+ call WriteString
+ call readint
+ mov PRICE2,eax
+
+ mov try,2
+
+call crlf
+call crlf
+mov edx,OFFSET ADDED
+call WriteString
+call crlf
+mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr 
+call mainmenu
+
+ ret
+
+ 
+ call exitprocess
+
+mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr 
+call mainmenu
+
+ret
+ call exitprocess
+
+  newrecord  ENDP
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EDIT_RECORD PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ editrecord proc
+   call start_design
+ mov eax,500
+ call delay
+
+
+ mov edx,OFFSET modifyrec 
+ call WriteString
+ call crlf
+
+
+ mov edx,OFFSET delrec 
+ call WriteString
+ call crlf
+
+
+
+ mov edx,OFFSET term 
+ call WriteString
+ call crlf
+
+
+ mov edx,OFFSET choose 
+ call WriteString
+ call  readint
+
+ mov choice,eax
+ .if(choice==1)
+ mov edx,OFFSET continue
+ call WriteString
+ call readchar
+ call clrscr 
+ call modifyrecord
+ .elseif(choice==2)
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+ call deleterecord
+
+ .else
+  mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr 
+call mainmenu
+ .ENDIF
+ ret
+ editrecord  ENDP
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;RENAME PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ modifyrecord proc
+
+ call start_design
+ mov eax,500
+ call delay
+
+ mov edx,OFFSET EBOOK
+ call WriteString
+ call readint
+
+ mov check,eax
+ .if(check==19)
+ mov esi,0 * TYPE namee
+
+  mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,OFFSET book_Name
+ mov ecx,SIZEOF book_Name-1
+ call ReadString
+ mov namee[esi],edx
+ call crlf
+
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,OFFSET author_Name
+ mov ecx,SIZEOF author_Name-1
+ call ReadString
+ mov aname[esi],edx
+ call crlf
+
+ mov edx,OFFSET EPRICE
+ call WriteString
+ call readint
+ mov PRICE[esi],eax
+ call crlf
+
+ mov edx,OFFSET continue
+    call WriteString
+    call readchar
+    call clrscr 
+    call editrecord
+     ret
+
+
+ .elseif(check==20)
+ mov esi,1 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,OFFSET book_Name
+ mov ecx,SIZEOF book_Name-1
+ call ReadString
+ mov namee[esi],edx
+ call crlf
+
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,OFFSET author_Name
+ mov ecx,SIZEOF author_Name-1
+ call ReadString
+ mov aname[esi],edx
+ call crlf
+
+ mov edx,OFFSET EPRICE
+ call WriteString
+ call readint
+ mov PRICE[esi],eax
+
+ mov edx,OFFSET continue
+    call WriteString
+    call readchar
+    call clrscr 
+    call editrecord
+     ret
+
+ .elseif(check==21)
+ mov esi,2 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,OFFSET book_Name
+ mov ecx,SIZEOF book_Name-1
+ call ReadString
+ mov namee[esi],edx
+ call crlf
+
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,OFFSET author_Name
+ mov ecx,SIZEOF author_Name-1
+ call ReadString
+ mov aname[esi],edx
+ call crlf
+
+ mov edx,OFFSET EPRICE
+ call WriteString
+ call readint
+ mov PRICE[esi],eax
+
+ mov edx,OFFSET continue
+    call WriteString
+    call readchar
+    call clrscr 
+    call editrecord
+     ret
+  
+
+
+  .elseif(check==22)
+ mov esi,3 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,OFFSET book_Name
+ mov ecx,SIZEOF book_Name-1
+ call ReadString
+ mov namee[esi],edx
+ call crlf
+
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,OFFSET author_Name
+ mov ecx,SIZEOF author_Name-1
+ call ReadString
+ mov aname[esi],edx
+ call crlf
+
+ mov edx,OFFSET EPRICE
+ call WriteString
+ call readint
+ mov PRICE[esi],eax
+
+ mov edx,OFFSET continue
+    call WriteString
+    call readchar
+    call clrscr 
+    call editrecord
+    ret
+
+	 .elseif(check==23)
+ mov esi,4 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,OFFSET book_Name
+ mov ecx,SIZEOF book_Name-1
+ call ReadString
+ mov namee[esi],edx
+ call crlf
+
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,OFFSET author_Name
+ mov ecx,SIZEOF author_Name-1
+ call ReadString
+ mov aname[esi],edx
+ call crlf
+
+ mov edx,OFFSET EPRICE
+ call WriteString
+ call readint
+ mov PRICE[esi],eax
+
+ mov edx,OFFSET continue
+    call WriteString
+    call readchar
+    call clrscr 
+    call editrecord
+     ret
+  
+ .else
+
+     mov eax,BOOK_ID2
+	 cmp check,eax
+	 jz yes
+	 jnz no
+
+
+yes:
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,OFFSET book_Name
+ mov ecx,SIZEOF book_Name-1
+ call ReadString
+ mov namee2,edx
+
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,OFFSET author_Name
+ mov ecx,SIZEOF author_Name-1
+ call ReadString
+ mov aname2,edx
+
+ mov edx,OFFSET EPRICE
+ call WriteString
+ call readint
+ mov PRICE2,eax
+
+ mov edx,OFFSET continue
+    call WriteString
+    call readchar
+    call clrscr 
+    call editrecord
+     ret
+
+
+ call exitprocess
+
+ no:
+
+ call crlf
+	   call crlf
+	   mov edx,OFFSET notexist
+       call WriteString
+	   call crlf
+
+    mov edx,OFFSET continue
+    call WriteString
+    call readchar
+    call clrscr 
+    call editrecord
+     ret
+
+	 call exitprocess
+
+	 .ENDIF
+ modifyrecord ENDP
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DELETE_RECORD  PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ deleterecord proc
+
+  call start_design
+ mov eax,500
+ call delay
+
+mov edx,OFFSET EBOOK
+ call WriteString
+ call readint
+ mov check,eax
+
+ .if(check==19)
+ mov esi,0 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writeint
+ call crlf
+ call crlf
+
+ mov name1,NULL
+ mov name6,NULL
+ mov PRICE[esi],0
+ mov BOOK_ID[esi],0
+
+  mov edx,OFFSET DELETED
+call WriteString
+call crlf
+call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call editrecord
+ ret
+
+
+ .elseif(check==20)
+ mov esi,1 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writeint
+ call crlf
+ call crlf
+
+ mov name2,NULL
+ mov name7,NULL
+ mov PRICE[esi],0
+ mov BOOK_ID[esi],0
+
+mov edx,OFFSET DELETED
+call WriteString
+call crlf
+call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call editrecord
+ ret
+
+ .elseif(check==21)
+ mov esi,2 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writeint
+ call crlf
+ call crlf
+
+ mov name3,NULL
+ mov name8,NULL
+ mov PRICE[esi],0
+ mov BOOK_ID[esi],0
+
+   mov edx,OFFSET DELETED
+call WriteString
+call crlf
+call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call editrecord
+ ret
+
+
+  .elseif(check==22)
+ mov esi,3 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writedec
+ call crlf
+ call crlf
+
+ mov name4,NULL
+ mov name9,NULL
+ mov PRICE[esi],0
+ mov BOOK_ID[esi],0
+
+mov edx,OFFSET DELETED
+call WriteString
+call crlf
+call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call editrecord
+ ret
+
+  .elseif(check==23)
+ mov esi,4 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writedec
+ call crlf
+ call crlf
+
+ mov name5,NULL
+ mov name10,NULL
+ mov PRICE[esi],0
+ mov BOOK_ID[esi],0
+
+mov edx,OFFSET DELETED
+call WriteString
+call crlf
+call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call editrecord
+ ret
+
+ .else
+
+ mov eax,check
+ cmp BOOK_ID2,eax
+ jz equal
+ jnz notequal
+ equal:
+ 
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee2
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx, aname2
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE2
+ call writedec
+ call crlf
+ call crlf
+
+ mov BOOK_ID2,0
+ mov namee2,0
+ mov aname2,0
+ mov PRICE2,0
+
+ mov edx,OFFSET DELETED
+call WriteString
+call crlf
+call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call editrecord
+ ret
+ call exitprocess
+
+ notequal:
+ mov edx,OFFSET notexist
+ call WriteString
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call editrecord
+ ret
+  call exitprocess
+
+.ENDIF
+
+
+ 
+ 
+
+
+
+ deleterecord ENDP
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ searching proc
+
+   call start_design
+ mov eax,500
+ call delay
+mov edx,OFFSET EBOOK
+ call WriteString
+ call readint
+ call crlf
+ call crlf
+ mov check,eax
+
+ .if(check==19)
+ mov esi,0 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writedec
+ call crlf
+ call crlf
+
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+ ret
+
+
+ .elseif(check==20)
+ mov esi,1 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writedec
+ call crlf
+ call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+ ret
+
+ .elseif(check==21)
+ mov esi,2 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writedec
+ call crlf
+ call crlf
+
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+ ret
+
+
+  .elseif(check==22)
+ mov esi,3 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writedec
+ call crlf
+ call crlf
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+ ret
+
+  .elseif(check==23)
+ mov esi,4 * TYPE namee
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx,aname[esi]
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE[esi]
+ call writedec
+ call crlf
+ call crlf
+
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+ ret
+
+ .else
+
+ mov eax,check
+ cmp BOOK_ID2,eax
+ jz equal
+ jnz notequal
+ equal:
+ 
+ mov edx,OFFSET ENAME
+ call WriteString
+ mov edx,namee2
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EANAME
+ call WriteString
+ mov edx, aname2
+ call writestring
+ call crlf
+ call crlf
+ mov edx,OFFSET EPRICE
+ call WriteString
+ mov eax,PRICE2
+ call writedec
+ call crlf
+ call crlf
+
+
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+ret
+call exitprocess
+
+ notequal:
+ mov edx,OFFSET notexist
+ call WriteString
+ call crlf
+ mov edx,OFFSET continue
+call WriteString
+call readchar
+call clrscr
+call mainmenu
+ ret
+  call exitprocess
+
+.ENDIF
+
+searching endp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ end main
